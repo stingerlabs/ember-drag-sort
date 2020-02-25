@@ -156,9 +156,6 @@ export default Component.extend({
 
     event.stopPropagation()
 
-    let xOffset = 0;
-    let yOffset = 0;
-
     const pos = this.element.getBoundingClientRect();
 
     const xOffset = event.pageX - pos.left;
