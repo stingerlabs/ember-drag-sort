@@ -156,10 +156,15 @@ export default Component.extend({
 
     event.stopPropagation()
 
+    const pos = this.element.getBoundingClientRect();
+
+    const xOffset = event.pageX - pos.left;
+    const yOffset = event.pageY - pos.top;
+
     // Required for Firefox. http://stackoverflow.com/a/32592759/901944
     if (event.dataTransfer) {
       if (event.dataTransfer.setData) event.dataTransfer.setData('text', '')
-      if (event.dataTransfer.setDragImage) event.dataTransfer.setDragImage(this.element, 0, 0)
+      if (event.dataTransfer.setDragImage) event.dataTransfer.setDragImage(this.element, xOffset, yOffset)
     }
 
     this.startDragging(event)
