@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: ember-drag-sort
-  description: [fork] A drag and drop sortable list addon
+  description: A drag and drop sortable list addon
   annotations:
     github.com/project-slug: stingerlabs/ember-drag-sort
     sonarqube.org/project-key: stingerlabs_ember-drag-sort
