@@ -15,6 +15,7 @@ metadata:
   tags:
     - javascript
     - ember
+    - fork
 spec:
   type: library
   lifecycle: production
