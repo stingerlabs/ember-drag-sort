@@ -6,8 +6,7 @@ metadata:
   annotations:
     github.com/project-slug: stingerlabs/ember-drag-sort
     sonarqube.org/project-key: stingerlabs_ember-drag-sort
-    snyk.io/org-name: greenlight-engineering
-    snyk.io/project-ids: 3279cc99-a36a-46c8-a057-69d4ed31713a
+    snyk.io/org-id: de43b40c-8694-45ec-985c-404d8ab5977e
   links:
     - url: https://greenlightguru.slack.com/archives/C05FS321Y6R
       title: '#ask channel'
