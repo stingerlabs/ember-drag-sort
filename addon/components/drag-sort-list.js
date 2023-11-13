@@ -23,11 +23,13 @@ export default Component.extend({
   childClass      : '',
   childTagName    : 'div',
   handle          : null,
+  sourceOnly      : false,
 
   isHorizontal : false,
   isRtl        : false,
 
   dragEndAction                  : undefined,
+  dragStartAction                : undefined,
   determineForeignPositionAction : undefined,
   yieldDragSortItemComponent     : false,
 

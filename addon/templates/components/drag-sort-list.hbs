@@ -1,3 +1,4 @@
+
 {{#each items as |item index|}}
   {{#if yieldDragSortItemComponent}}
     {{yield (hash
@@ -21,23 +22,25 @@
       )
     )}}
   {{else}}
-    {{#drag-sort-item
-      additionalArgs                 = additionalArgs
-      item                           = item
-      index                          = index
-      items                          = items
-      group                          = group
-      handle                         = handle
-      class                          = childClass
-      tagName                        = childTagName
-      isHorizontal                   = isHorizontal
-      isRtl                          = isRtl
-      draggingEnabled                = draggingEnabled
-      dragEndAction                  = dragEndAction
-      determineForeignPositionAction = determineForeignPositionAction
-      sourceOnly                     = sourceOnly
-    }}
+    <DragSortItem
+      @additionalArgs                 = {{this.additionalArgs}}
+      @item                           = {{item}}
+      @index                          = {{index}}
+      @items                          = {{this.items}}
+      @group                          = {{this.group}}
+      @handle                         = {{this.handle}}
+      @tagName                        = {{this.childTagName}}
+      @isHorizontal                   = {{this.isHorizontal}}
+      @isRtl                          = {{this.isRtl}}
+      @draggingEnabled                = {{this.draggingEnabled}}
+      @sourceOnly                     = {{this.sourceOnly}}
+
+      @dragEndAction                  = {{this.dragEndAction}}
+      @dragStartAction                = {{this.dragStartAction}}
+      @determineForeignPositionAction = {{this.determineForeignPositionAction}}
+
+      class = {{this.childClass}}
+    >
       {{yield item index}}
-    {{/drag-sort-item}}
-  {{/if}}
+    </DragSortItem>
 {{/each}}

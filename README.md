@@ -4,9 +4,9 @@
 [![Ember Observer Score](http://emberobserver.com/badges/ember-drag-sort.svg?cache_bust=1)](http://emberobserver.com/addons/ember-drag-sort)
 [![npm package version](https://img.shields.io/npm/v/ember-drag-sort.svg)](https://www.npmjs.com/package/ember-drag-sort)
 [![license MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/kaliber5/ember-drag-sort/blob/gen-1/LICENSE.md)
-![ember-versions 1.13+](https://img.shields.io/badge/ember--versions-1.13%2B-yellowgreen.svg)
+![ember-versions 3.12+](https://img.shields.io/badge/ember--versions-3.12%2B-yellowgreen.svg)
 ![node-versions 8+](https://img.shields.io/badge/node--versions-8%2B-yellowgreen.svg)
-![ember-cli 3.8.1](https://img.shields.io/badge/uses%20ember--cli-3.8.1-blue.svg)
+![ember-cli 3.15.1](https://img.shields.io/badge/uses%20ember--cli-3.15.1-blue.svg)
 
 - [ember-drag-sort](#ember-drag-sort)
   - [Support](#support)
@@ -20,6 +20,7 @@
   - [Usage](#usage)
     - [Basic usage](#basic-usage)
     - [The drag end action](#the-drag-end-action)
+    - [The drag start action](#the-drag-start-action)
     - [The determine foreign position action](#the-determine-foreign-position-action)
     - [Marking a list as a source only bucket](#marking-a-list-as-a-source-only-bucket)
     - [Passing additional arguments](#passing-additional-arguments)
@@ -82,8 +83,9 @@ https://kaliber5.github.io/ember-drag-sort/
 
 ## Versions, branches and jQuery
 
-* Version 1.x, `gen-0` branch is based on jQuery.
-* Version 2.x, `gen-1` branch (current development head) has got rid of jQuery. Except for page objects which [still import](https://github.com/san650/ember-cli-page-object/blob/v1.15.2/index.js#L23-L28) jQuery in test env.
+* Version 1.x, `gen-0` branch is based on jQuery. Supports Ember CLI 1.13+.
+* Version 2.x, `gen-1` branch (current development head) has got rid of jQuery. Except for page objects which [still import](https://github.com/san650/ember-cli-page-object/blob/v1.15.2/index.js#L23-L28) jQuery in test env. Supports Ember CLI 3.8+.
+* Version 3.x, `gen-2` branch supports Ember CLI 3.12+.
 
 
 
@@ -124,26 +126,6 @@ Install the addon:
 
     ember i ember-drag-sort
 
-You'll also need to install a dependency with either npm:
-
-    npm i -D babel-plugin-transform-object-rest-spread
-
- or Yarn:
-
-    yarn add -D babel-plugin-transform-object-rest-spread
-
-Finally, add this to your `ember-cli-build.js`:
-
-```js
-  babel: {
-    plugins: [
-      'transform-object-rest-spread'
-    ]
-  }
-```
-
-
-
 ## Usage
 
 ### Basic usage
@@ -156,13 +138,13 @@ The `drag-sort-list` component accepts two mandatory arguments:
 The component accepts a block representing an individual item (the block is rendered multiple times, one per list item). It yields `item` and `index`.
 
 ```handlebars
-{{#drag-sort-list
-  items         = items1
-  dragEndAction = (action 'dragEnd')
+<DragSortList
+  @items         = {{this.items1}}
+  @dragEndAction = {{this.dragEnd}}
   as |item|
-}}
+>
   {{item.name}}
-{{/drag-sort-list}}
+</DragSortList>
 ```
 
 ### The drag end action
@@ -189,27 +171,60 @@ When sorting within one list, `targetIndex` assumes that the dragged item is not
 Here's the reference implementation of the `dragEndAction` action:
 
 ```js
-  actions: {
-    dragEndAction ({sourceList, sourceIndex, targetList, targetIndex/* , sourceArgs, targetArgs */}) {
-      if (sourceList === targetList && sourceIndex === targetIndex) return
+  @action
+  dragEndAction ({sourceList, sourceIndex, targetList, targetIndex/* , sourceArgs, targetArgs */}) {
+    if (sourceList === targetList && sourceIndex === targetIndex) return
 
-      const item = sourceList.objectAt(sourceIndex)
+    const item = sourceList.objectAt(sourceIndex)
 
-      sourceList.removeAt(sourceIndex)
-      targetList.insertAt(targetIndex, item)
-    }
+    sourceList.removeAt(sourceIndex)
+    targetList.insertAt(targetIndex, item)
   }
 ```
 
-The `dragEndAction` action *must* be a closure action.
 
-Correct:
 
-    dragEndAction = (action 'dragEnd')
+### The drag start action
 
-Incorrect:
+This action is called when a drag is beginning, and can be used to customize the drag image, or otherwise modify the data transfer. It's called with a single argument -- an object with the following properties:
 
-    dragEndAction = 'dragEnd'
+| Property       | Type         | Description                                       |
+|:---------------|:-------------|:--------------------------------------------------|
+| `event`        | Event        | The `dragstart` event.                            |
+| `element`      | DOMElement   | The DOM element being dragged.                    |
+| `draggedItem`  | <any>        | The list item being dragged.                      |
+
+This can be used to put margins around the list items without those margins being included in the drag image:
+
+```css
+.the-item {
+  margin: 20px;
+}
+```
+
+```handlebars
+<DragSortList
+  items           = {{this.items1}}
+  dragStartAction = {{action "dragStart"}}
+  dragEndAction   = {{action "dragEnd"}}
+  as |item|
+>
+  <div class="the-item">
+    {{item.name}}
+  </div>
+</DragSortList>
+```
+
+```javascript
+actions: {
+  dragStart({ event, element }) {
+    let target = element.querySelector('.the-item');
+    let { x, y } = element.getBoundingClientRect();
+    // Set drag image, positioning it to align with `.the-item`'s position
+    event.dataTransfer.setDragImage(target, event.clientX - x, event.clientY - y);
+  }
+}
+```
 
 
 
@@ -237,6 +252,7 @@ This action must return an **integer** -- the desired position of the item.
 The simplest implementation is to always put the item into the end of the list:
 
 ```js
+@action
 determineForeignPosition ({/* draggedItem,  */items}) {
   return items.length
 }
@@ -245,6 +261,7 @@ determineForeignPosition ({/* draggedItem,  */items}) {
 To sort items alphabetically, you  can use lodash:
 
 ```js
+@action
 determineForeignPosition ({draggedItem, items}) {
   return _.sortedIndex(items.toArray(), draggedItem)
 }
@@ -253,6 +270,7 @@ determineForeignPosition ({draggedItem, items}) {
 Or do it by hand:
 
 ```js
+@action
 determineForeignPosition ({draggedItem, items}) {
     return Ember.A(items.slice()) // make sure not to mutate the list; `Ember.A()` is typically redundant
       .addObject(draggedItem)
@@ -263,15 +281,7 @@ determineForeignPosition ({draggedItem, items}) {
 
 **`determineForeignPositionAction` must not actually sort the list**. It's only purpose is to suggest desired item position, which is necessary to display the placeholder.
 
-**`determineForeignPositionAction` must passed as a closure action**.
 
-Correct:
-
-    determineForeignPositionAction = (action 'determineForeignPosition')
-
-Incorrect:
-
-    determineForeignPositionAction = 'determineForeignPosition'
 
 ### Marking a list as a source only bucket
 
@@ -282,27 +292,19 @@ reordered or modified by dragging items out of it. It is only a source to drag t
 This list would be marked as source only:
 
 ```hbs
-{{#drag-sort-list
-  items         = items1
-  dragEndAction = (action 'dragEnd')
-  sourceOnly    = true
+<DragSortList
+  @items         = {{this.items1}}
+  @dragEndAction = {{this.dragEnd}}
+  @sourceOnly    = {{true}}
   as |item|
-}}
+>
   {{item.name}}
-{{/drag-sort-list}}
+</DragSortList>
 ```
 
 You could then have one or more other lists which you could drag the items from the source list into.
 
-```hbs
-{{#drag-sort-list
-  items         = items2
-  dragEndAction = (action 'dragEnd')
-  as |item|
-}}
-  {{item.name}}
-{{/drag-sort-list}}
-```
+
 
 ### Passing additional arguments
 
@@ -314,20 +316,21 @@ To resolve this problem, pass the parent into the `drag-sort-list` component via
 
 ```handlebars
 {{#each parents as |parent|}}
-  {{#drag-sort-list
-    items          = parent.children
-    additionalArgs = (hash parent=parent foo="bar")
-    dragEndAction  = (action 'dragEnd')
+  <DragSortList
+    @items          = {{this.parent.children}}
+    @additionalArgs = {{hash parent=parent foo="bar"}}
+    @dragEndAction  = {{this.dragEnd}}
     as |child|
   }}
     {{child.name}}
-  {{/drag-sort-list}}
+  </DragSortList>
 {{/each}}
 ```
 
 Now you can access the parent of both source and target lists in the `dragEndAction`. The value of `additionalArgs` will be exposed as `sourceArgs` and `targetArgs`:
 
 ```js
+@action
 dragEndAction({ sourceList, sourceIndex, sourceArgs, targetList, targetIndex, targetArgs }) {
   if (sourceModel === targetModel && sourceIndex === targetIndex) return;
 
@@ -353,6 +356,7 @@ dragEndAction({ sourceList, sourceIndex, sourceArgs, targetList, targetIndex, ta
 |:---------------------------------|:---------------------------------------------|:--------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `items`                          | Ember Array                                  | <required>    | An array of items to display and offer sorting.                                                                                                                                                 |
 | `dragEndAction`                  | Closure action                               | <required>    | This callback will be called on source list when sorting is complete. See above for details.                                                                                                    |
+| `dragStartAction`                | Closure action                               | <required>    | This callback will be called on source list when dragging is starting. See above for details.                                                                                                    |
 | `determineForeignPositionAction` | Closure action or `undefined`                | `undefined`   | When provided, used to determine the position of the placeholder when dragging a foreign item into the list. When not provided, the user is able to determine the order. See above for details. |
 | `group`                          | <any>                                        | `undefined`   | Used to restrict dragging between multiple lists to only some of those lists. Typically a string.                                                                                               |
 | `draggingEnabled`                | Boolean                                      | `true`        | Disables sorting. Useful when `dragEndAction` is an async operation.                                                                                                                            |
@@ -638,15 +642,15 @@ export default create({
 You can not provide a custom descriptor for `dragSortItem`, but you can describe its content. For example, you can describe the following template:
 
 ```handlebars
-{{#drag-sort-list
-  items         = items
-  dragEndAction = (action 'dragEndAction')
+<DragSortList
+  @items         = {{this.items}}
+  @dragEndAction = {{this.dragEndAction}}
   as |item|
-}}
+>
   <div class = 'drag-sort-item-content'>
     {{item.name}}
   </div>
-{{/drag-sort-list}}
+</DragSortList>
 ```
 
 ...by importing the page object component factory from `{dragSortList}` and passing your item description into it like this:
@@ -762,9 +766,17 @@ See this addon's acceptance test for example.
 
 ## Development
 
+### Use Volta
+
+Use [Volta](https://volta.sh) to automatically pick correct Node and Yarn versions.
+
+
+
 ### Do not use npm, use yarn
 
 This project uses [Yarn](https://yarnpkg.com/) to lock dependencies. You can install yarn with `npm i -g yarn`.
+
+
 
 ### Installation for development
 
