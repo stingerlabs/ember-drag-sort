@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ember-drag-sort
+  description: A drag and drop sortable list addon
+  annotations:
+    github.com/project-slug: stingerlabs/ember-drag-sort
+    sonarqube.org/project-key: stingerlabs_ember-drag-sort
+    snyk.io/org-id: de43b40c-8694-45ec-985c-404d8ab5977e
+  links:
+    - url: https://greenlightguru.slack.com/archives/C05FS321Y6R
+      title: '#ask channel'
+      icon: help
+  tags:
+    - javascript
+    - ember
+    - fork
+spec:
+  type: library
+  lifecycle: production
