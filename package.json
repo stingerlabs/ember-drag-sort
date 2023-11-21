@@ -97,11 +97,6 @@
     "configPath": "tests/dummy/config",
     "demoURL": "https://kaliber5.github.io/ember-drag-sort/"
   },
-  "resolutions": {
-    "gift": "^0.10.2",
-    "@babel/traverse": "^7.23.2",
-    "lodash": "^4.17.21"
-  },
   "volta": {
     "node": "16.15.1",
     "yarn": "1.22.19"
