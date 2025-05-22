@@ -3,24 +3,6 @@ import { triggerEvent, settled } from '@ember/test-helpers'
 
 
 
-// // https://github.com/jgwhite/ember-sortable/blob/21d2c513f96796f9b1a56983d34cf501a1f169c2/tests/integration/components/sortable-group-test.js#L35-L40
-// export function triggerEvent (elementOrSelector, eventName, params) {
-//   run(() => {
-//     const element =
-//       (elementOrSelector instanceof Element)
-//         ? elementOrSelector
-//         : find(elementOrSelector)
-
-//     if (typeof params === 'function') params = params(element)
-
-//     const event = new CustomEvent(eventName, params)
-
-//     element.dispatchEvent(event)
-//   })
-// }
-
-
-
 export default function trigger (elementOrSelector, eventName, isDraggingUp) {
   const element =
     (elementOrSelector instanceof Element)
